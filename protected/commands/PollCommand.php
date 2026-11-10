@@ -808,7 +808,7 @@ class PollCommand extends CConsoleCommand
 					$module->name = $name;
 					$module->sym_load_status = $symLoadStatus;					
 					$module->file_version = $fileVersion;					
-					$module->timestamp = $timeStamp;					
+					$module->timestamp = $timeStamp & 0x7fffffff;	// daveb: protection as this is getting stored in a 32bit signed int field
 					$module->matching_pdb_guid = $guidnAge;					
                     
 					$debugInfo = DebugInfo::model()->findByAttributes(array('guid'=>$loadedPdbGUID));
