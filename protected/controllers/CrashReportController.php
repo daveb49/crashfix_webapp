@@ -56,7 +56,8 @@ class CrashReportController extends Controller
                     'geoLocationDist',
 					'processAgain', 
 					'reprocessMultiple', 
-                    'reprocessAll', 					
+                    'reprocessAll',
+                    'exportAll',
                     'delete', 
 					'deleteMultiple', 
                     'uploadFile'
@@ -380,6 +381,83 @@ class CrashReportController extends Controller
         // Redirect to index
         $this->redirect(array('crashReport/index'));
 	}
+
+
+    /**
+     * Exports all crash reports in the current project/version (or collection)
+     * as a tab-separated text file.
+     */
+    public function actionExportAll()
+    {
+        // Require permission to manage crash reports in the current project.
+        $this->checkAuthorization(null, 'pperm_manage_crash_reports');
+
+        $projectId = Yii::app()->user->getCurProjectId();
+        if($projectId == false)
+            throw new CHttpException(400, 'Invalid request.');
+
+        $curProjVer = Yii::app()->user->getCurProjectVer();
+
+        // Use the same scope as actionReprocessAll().
+        $criteria = new CDbCriteria();
+        $criteria->compare('project_id', $projectId);
+        if($curProjVer != Project::PROJ_VER_ALL)
+            $criteria->compare('appversion_id', $curProjVer);
+
+        if(isset($_GET['groupid']))
+        {
+            $groupid = (int)$_GET['groupid'];
+            $criteria->compare('groupid', $groupid);
+        }
+
+        $models = CrashReport::model()->findAll($criteria);
+
+        // Stream the export directly to the browser; no temporary file needed.
+        $filename = 'crashlist.txt';
+        header('Content-Type: text/tab-separated-values; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+        header('Pragma: public');
+
+        $out = fopen('php://output', 'w');
+        if($out === false)
+            throw new CHttpException(500, 'Unable to create crash report export.');
+
+        fputcsv($out, array(
+            'ID',
+            'Project Version',
+            'Date Received',
+            'IP Address',
+            'E-mail',
+            'Description',
+            'Crash GUID',
+            'Report File Name',
+            'MD5 Hash',
+            'Exception Module'
+        ), "\t");
+
+        foreach($models as $model)
+        {
+            // Retain the per-report authorization check used by reprocessAll().
+            $this->checkAuthorization($model, 'pperm_manage_crash_reports');
+
+            fputcsv($out, array(
+                $model->id,
+                $model->appVersion ? $model->appVersion->version : '',
+                date('d/m/y H:i', $model->received),
+                $model->ipaddress,
+                $model->emailfrom,
+                $model->description,
+                $model->crashguid,
+                $model->srcfilename,
+                $model->md5,
+                $model->exceptionmodule
+            ), "\t");
+        }
+
+        fclose($out);
+        Yii::app()->end();
+    }
 
 	/**
 	 * This action lists all models.

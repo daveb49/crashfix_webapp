@@ -129,6 +129,13 @@
                                         'confirm'=>"WARNING! This action may take a long time. Are you sure you want to reprocess all crash reports ".$text."?"
                                     )).'</li>'; 
                         }
+                    ?>
+
+                    <?php
+                        if(Yii::app()->user->checkAccess('pperm_manage_crash_reports', array('project_id'=>Yii::app()->user->getCurProjectId())))
+                            echo '<li>'.CHtml::link("Download All CrashList.txt",
+                                    $this->createUrl('crashReport/exportAll', isset($groupid)?array('groupid'=>$groupid):array())
+                                ).'</li>';
                     ?>	
                 </ul>
             </li>            
