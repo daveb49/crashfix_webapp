@@ -132,9 +132,19 @@ class WebUser extends CWebUser
 			throw new CHttpException(403, 'Invalid request.');
 		}
 		
-		// Select all versions for this project
-		$criteria = new CDbCriteria;		
-		$criteria->condition = 'project_id='.$this->getCurProjectId();
+		// Select versions for this project that have crash reports
+		$criteria = new CDbCriteria;
+		$criteria->condition = 'project_id=:projectId';
+		$criteria->params = array(
+        		':projectId'=>$this->getCurProjectId()
+		);
+		$criteria->addCondition(
+       			 'EXISTS (
+       			         SELECT 1
+       			         FROM {{crashreport}} cr
+       			         WHERE cr.appversion_id = t.id
+       			 )'
+		);
 		$criteria->order = 'version DESC';
 		$models = AppVersion::model()->findAll($criteria);
 		
