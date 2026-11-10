@@ -268,7 +268,7 @@ class User extends CActiveRecord
 		$emailText = "This message has been sent to you, because someone has created\r\n";
 		$emailText .= "a CrashFix account for you.\r\n\r\n";
 		$emailText .= "IMPORTANT: If you did not request to create a CrashFix account for you,\r\n";
-		$emailText .= "tell your administrator about this letter.\r\n\r";
+		$emailText .= "tell your administrator about this letter.\r\n\r\n";
 		$emailText .= "If you did request to create an account for you, then please follow\r\n";
 		$emailText .= "this link to login into your CrashFix account and enter your new password:\r\n";
 		$emailText .= Yii::app()->createAbsoluteUrl('site/login', array('prt'=>$this->pwd_reset_token));

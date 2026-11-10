@@ -242,7 +242,7 @@ class SiteController extends Controller
 				$emailText = "This message has been sent to you, because someone requested\r\n";
 				$emailText .= "to recover lost password of your CrashFix account.\r\n\r\n";
 				$emailText .= "IMPORTANT: If you did not request to recover your lost password,\r\n";
-				$emailText .= "tell your administrator about this letter.\r\n\r";
+				$emailText .= "tell your administrator about this letter.\r\n\r\n";
 				$emailText .= "If you did request to recover your lost password, then please follow\r\n";
 				$emailText .= "this link to login into your CrashFix account and reenter your password:\r\n";
 				$emailText .= $this->createAbsoluteUrl('site/login', array('prt'=>$pwdResetToken));
